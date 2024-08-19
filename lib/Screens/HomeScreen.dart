@@ -4,8 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shopshy/Bloc/Product/Product_bloc.dart';
 import 'package:shopshy/Core/Utils/imports.dart';
 import 'package:shopshy/Core/Utils/text_builder.dart';
+import 'package:shopshy/Models/ProductMasterModel.dart';
 import 'package:shopshy/Repository/Product_repository.dart';
 import 'package:shopshy/Screens/LoginScreen.dart';
+import 'package:shopshy/Screens/ProductDetailScreen.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -43,8 +45,10 @@ class _HomePageState extends State<HomePage> {
             if (state is ProductLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is ProductLoaded) {
+              // Convert each Map to ProductMasterModel
               var filteredProducts = state.products
-                  .where((product) => product['title']!
+                  .map((product) => ProductMasterModel.fromJson(product))
+                  .where((product) => product.title!
                       .toLowerCase()
                       .contains(query.toLowerCase()))
                   .toList();
@@ -87,99 +91,114 @@ class _HomePageState extends State<HomePage> {
                       itemCount: filteredProducts.length,
                       shrinkWrap: true,
                       itemBuilder: (context, index) {
-                        final product = filteredProducts[index];
-                        return Container(
-                          margin: const EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black),
-                              borderRadius: BorderRadius.circular(5)),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Expanded(
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
-                                  clipBehavior: Clip.antiAlias,
-                                  child: Image.network(
-                                    product['image'],
-                                    height: MediaQuery.sizeOf(context).height,
-                                    width: double.infinity,
-                                    fit: BoxFit.contain,
-                                    colorBlendMode: BlendMode.overlay,
+                        ProductMasterModel product = filteredProducts[index];
+
+                        return InkWell(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ProductDetailsScreen(
+                                          product: product,
+                                        )));
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Expanded(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(20),
+                                    clipBehavior: Clip.antiAlias,
+                                    child: Hero(
+                                      tag:
+                                          'product_${product.id}', // Unique Hero tag
+                                      child: Image.network(
+                                        product.image ?? '',
+                                        height:
+                                            MediaQuery.sizeOf(context).height,
+                                        width: double.infinity,
+                                        fit: BoxFit.contain,
+                                        colorBlendMode: BlendMode.overlay,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 5.0),
-                              Padding(
-                                padding: const EdgeInsets.all(5.0),
-                                child: Column(
-                                  children: [
-                                    Align(
-                                      alignment: Alignment.topLeft,
-                                      child: TextBuilder(
-                                        text: product['title']!,
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 16,
-                                        maxLines: 3,
-                                        textOverflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Padding(
-                                      padding: const EdgeInsets.all(4),
-                                      child: SizedBox(
-                                        // height: 50,
-                                        width: double.infinity,
-                                        child: RatingBar.builder(
-                                          initialRating: double.tryParse(
-                                              product['rating']['rate']
-                                                  .toString())!,
-                                          minRating: 1,
-                                          direction: Axis.horizontal,
-                                          itemSize: 15,
-                                          allowHalfRating: true,
-                                          itemCount: 5,
-                                          itemPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 0.0),
-                                          itemBuilder: (context, _) =>
-                                              const Icon(
-                                            Icons.star,
-                                            color: Colors.amber,
-                                          ),
-                                          onRatingUpdate: (rating) {},
+                                const SizedBox(height: 5.0),
+                                Padding(
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: Column(
+                                    children: [
+                                      Align(
+                                        alignment: Alignment.topLeft,
+                                        child: TextBuilder(
+                                          text: product.title ?? '',
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 16,
+                                          maxLines: 3,
+                                          textOverflow: TextOverflow.ellipsis,
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 2, right: 2),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              const TextBuilder(
-                                                text: '₹ ',
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black,
-                                                fontSize: 24,
-                                              ),
-                                              TextBuilder(
-                                                text: product['price']!
-                                                    .round()
-                                                    .toString(),
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 24,
-                                                color: Colors.black,
-                                              ),
-                                            ],
+                                      const SizedBox(height: 5),
+                                      Padding(
+                                        padding: const EdgeInsets.all(4),
+                                        child: SizedBox(
+                                          width: double.infinity,
+                                          child: RatingBar.builder(
+                                            initialRating:
+                                                product.rating?.rate ?? 0.0,
+                                            minRating: 1,
+                                            direction: Axis.horizontal,
+                                            itemSize: 15,
+                                            allowHalfRating: true,
+                                            itemCount: 5,
+                                            itemPadding:
+                                                const EdgeInsets.symmetric(
+                                                    horizontal: 0.0),
+                                            itemBuilder: (context, _) =>
+                                                const Icon(
+                                              Icons.star,
+                                              color: Colors.amber,
+                                            ),
+                                            onRatingUpdate: (rating) {},
                                           ),
-                                          ElevatedButton(
+                                        ),
+                                      ),
+                                      const SizedBox(height: 5),
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 2, right: 2),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                const TextBuilder(
+                                                  text: '₹ ',
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black,
+                                                  fontSize: 24,
+                                                ),
+                                                TextBuilder(
+                                                  text:
+                                                      ((product.price ?? 0.0) *
+                                                              83.65)
+                                                          .round()
+                                                          .toString(),
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 24,
+                                                  color: Colors.black,
+                                                ),
+                                              ],
+                                            ),
+                                            ElevatedButton(
                                               onPressed: () {},
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor:
@@ -193,14 +212,16 @@ class _HomePageState extends State<HomePage> {
                                                 padding:
                                                     const EdgeInsets.all(5),
                                               ),
-                                              child: const Text('Cart')),
-                                        ],
+                                              child: const Text('Cart'),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         );
                       },

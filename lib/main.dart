@@ -3,10 +3,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shopshy/Bloc/Login/Login_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shopshy/Repository/Login_repository.dart';
+import 'package:shopshy/Screens/HomePage.dart';
 import 'package:shopshy/Screens/HomeScreen.dart';
 import 'package:shopshy/Screens/LoginScreen.dart';
 import 'package:shopshy/Screens/Splashscreen.dart';
@@ -48,7 +50,7 @@ class _MyAppState extends State<MyApp> {
       print("Error${e}");
     }
 
-    showFirstScreen = userToken!.isNotEmpty ? HomePage() : LoginPage();
+    showFirstScreen = userToken!.isNotEmpty ? HomeScreen() : LoginPage();
     await Future.delayed(const Duration(seconds: 2));
   }
 
@@ -63,19 +65,22 @@ class _MyAppState extends State<MyApp> {
         print("Error${e}");
       }
 
-      showFirstScreen = userToken!.isNotEmpty ? HomePage() : LoginPage();
+      showFirstScreen = userToken!.isNotEmpty ? HomeScreen() : LoginPage();
     });
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-            useMaterial3: true,
-            appBarTheme: const AppBarTheme(
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              systemOverlayStyle:
-                  SystemUiOverlayStyle(statusBarBrightness: Brightness.dark),
-            )),
+                colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+                useMaterial3: true,
+                appBarTheme: const AppBarTheme(
+                  elevation: 0,
+                  backgroundColor: Colors.transparent,
+                  systemOverlayStyle: SystemUiOverlayStyle(
+                      statusBarBrightness: Brightness.dark),
+                ))
+            .copyWith(
+                textTheme:
+                    GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme)),
         title: 'shopshy',
         home: BlocProvider(
           create: (context) => LoginBloc(authRepository: widget.authRepository),
