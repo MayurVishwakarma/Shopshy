@@ -25,21 +25,21 @@ class _HomePageState extends State<HomePage> {
         ..add(FetchProducts()),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Home'),
-          actions: [
-            IconButton(
-                onPressed: () async {
-                  SharedPreferences preferences =
-                      await SharedPreferences.getInstance();
-                  preferences.clear();
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginPage()),
-                  );
-                },
-                icon: const Icon(Icons.logout))
-          ],
-        ),
+            // title: const Text('Home'),
+            // actions: [
+            //   IconButton(
+            //       onPressed: () async {
+            //         SharedPreferences preferences =
+            //             await SharedPreferences.getInstance();
+            //         preferences.clear();
+            //         Navigator.pushReplacement(
+            //           context,
+            //           MaterialPageRoute(builder: (context) => LoginPage()),
+            //         );
+            //       },
+            //       icon: const Icon(Icons.logout))
+            // ],
+            ),
         body: BlocBuilder<ProductBloc, ProductState>(
           builder: (context, state) {
             if (state is ProductLoading) {
@@ -56,7 +56,8 @@ class _HomePageState extends State<HomePage> {
               return Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 8.0),
                     child: TextFormField(
                       controller: textEditingController,
                       onChanged: (value) {
